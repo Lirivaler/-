@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<style>
+:root{--bg:#1b2a5c;--ink:#0b1230;--white:#fff;--yellow:#ffd23f}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--bg);font-family:Inter,"DejaVu Sans",sans-serif;color:#fff}
+canvas{position:absolute;left:0;top:0}
+.l{position:absolute;left:0;width:1080px;text-align:center;opacity:0;font-weight:800;text-wrap:balance}
+.t{font-size:112px;line-height:1.08;top:0}
+.t b{color:var(--yellow);font-weight:800}
+.cap{top:1610px;font-size:68px;line-height:1.15;padding:0 80px;text-shadow:0 6px 0 var(--ink)}
+#prompt{position:absolute;left:60px;top:300px;width:960px;height:130px;border:8px solid var(--ink);border-radius:36px;background:#fff;color:var(--ink);box-shadow:10px 10px 0 var(--ink);opacity:0;display:flex;align-items:center;padding:0 30px;font-size:35px;font-weight:700;white-space:nowrap}
+#fin1{top:1060px;font-size:86px;white-space:nowrap;text-shadow:0 8px 0 var(--ink)}
+#fin2{top:1260px;font-size:52px;font-weight:600;color:#cfd8ff;padding:0 100px}
+#note{top:1840px;font-size:30px;font-weight:600;color:#9fb0ee}
+</style></head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<div class="l t" id="t1" style="top:520px">Є три речі,</div>
+<div class="l t" id="t2" style="top:640px">на які можна</div>
+<div class="l t" id="t3" style="top:760px">дивитися</div>
+<div class="l t" id="t4" style="top:880px"><b>безкінечно</b></div>
+<div class="l cap" id="cap1">Як тече вода</div>
+<div class="l cap" id="cap2">Як горить вогонь</div>
+<div class="l cap" id="cap3">Як Claude збирає фінмодель для CFO</div>
+<div id="prompt"><span id="ptxt"></span><span id="cur" style="display:inline-block;width:4px;height:50px;background:var(--ink);margin-left:6px"></span></div>
+<div class="l" id="fin1">Вода. Вогонь. Claude.</div>
+<div class="l" id="fin2">Фінанси переходять у новий час.</div>
+<div class="l" id="note">Ілюстративні дані</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);
+const INK='#0b1230',W=1080,H=1920;
+const cl=x=>Math.max(0,Math.min(1,x)),eo=x=>1-Math.pow(1-cl(x),3),
+ seg=(t,a,d=.7)=>eo((t-a)/d),lerp=(a,b,p)=>a+(b-a)*p,
+ back=x=>{x=cl(x);const c=1.9;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const hh=n=>{const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x)};
+function show(el,p,dy=30){el.style.opacity=cl(p);el.style.transform=`translateY(${(1-cl(p))*dy}px)`}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function box(x,y,w,h,r,fill,lw=8,sh=10){ if(sh){ctx.fillStyle=INK;rr(x+sh,y+sh,w,h,r);ctx.fill()}
+ ctx.fillStyle=fill;rr(x,y,w,h,r);ctx.fill();ctx.lineWidth=lw;ctx.strokeStyle=INK;ctx.stroke()}
+ctx.lineJoin='round';ctx.lineCap='round';
+
+// ---- Water tank
+function water(t,a){ if(a<=0)return; ctx.save(); ctx.globalAlpha=a;
+ const rise=(1-seg(t,3.1,.9))*500 + seg(t,9.6,1)*300;
+ ctx.translate(0,rise);
+ ctx.fillStyle=INK;rr(70,570,960,940,70);ctx.fill();
+ ctx.save();rr(60,560,960,940,70);ctx.clip();ctx.fillStyle='#bdeaff';ctx.fillRect(0,0,W,H);
+ const cols=['#7fd6ff','#4cc3f5','#2aa6e8','#1b86d1','#1568b3'];
+ for(let k=0;k<5;k++){const base=700+k*150,A=36+k*6;
+  ctx.beginPath();ctx.moveTo(0,1600);
+  for(let x=0;x<=W;x+=10){const y=base+A*Math.sin(x*.0085+t*(1.1+k*.15)+k*1.7)+A*.4*Math.sin(x*.018-t*1.6+k);ctx.lineTo(x,y)}
+  ctx.lineTo(W,1600);ctx.closePath();ctx.fillStyle=cols[k];ctx.fill();ctx.lineWidth=9;ctx.strokeStyle=INK;ctx.stroke();}
+ for(let i=0;i<9;i++){const u=((t*.12+hh(i))%1),x=120+hh(i+9)*840+Math.sin(t*2+i)*14,y=1450-u*800,r=10+hh(i+3)*14;
+  ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle='rgba(255,255,255,.55)';ctx.fill();ctx.lineWidth=5;ctx.strokeStyle=INK;ctx.stroke()}
+ ctx.restore();ctx.lineWidth=10;ctx.strokeStyle=INK;rr(60,560,960,940,70);ctx.stroke();ctx.restore()}
+
+// ---- Fire
+function flameShape(cx,by,w,h,t,ph,fill){const s1=Math.sin(t*5+ph)*.12*w,s2=Math.sin(t*7+ph*2)*.18*w,hv=h*(1+.05*Math.sin(t*9+ph));
+ ctx.beginPath();ctx.moveTo(cx,by);
+ ctx.bezierCurveTo(cx-w,by-hv*.15,cx-w*.85+s1,by-hv*.65,cx+s2,by-hv);
+ ctx.bezierCurveTo(cx+w*.85+s1,by-hv*.65,cx+w,by-hv*.15,cx,by);ctx.closePath();
+ ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=10;ctx.strokeStyle=INK;ctx.stroke()}
+function logs(cx,by){ctx.save();ctx.translate(cx,by);
+ for(const s of [-1,1]){ctx.save();ctx.rotate(s*.2);box(-260,-10,520,70,35,'#9a6330',8,0);ctx.restore()}ctx.restore()}
+function fireScene(t,a,sf){ if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+ const cx=540,by=1420; ctx.save();ctx.translate(cx,by);ctx.scale(sf,sf);ctx.translate(-cx,-by);
+ flameShape(cx-190,by,120,330,t,1,'#ff5a1f');flameShape(cx+190,by,110,290,t,3,'#ff5a1f');
+ flameShape(cx,by,270,720,t,0,'#ff5a1f');flameShape(cx,by,200,540,t,2,'#ff9a1f');flameShape(cx,by,125,340,t,4,'#ffe14d');ctx.restore();
+ logs(cx,by+20);ctx.restore()}
+function spark(i,t){const sp=.16+hh(i*5)*.1,u=(t*sp+hh(i*7))%1;
+ return{x:540+(hh(i*3+1)-.5)*420+Math.sin(t*2+i)*40*u,y:1400-u*1050,u}}
+const COLX=[60,360,580,800],COLW=[300,220,220,220],TY=500,RH=100;
+const cellC=(r,c)=>[COLX[c]+COLW[c]/2,TY+r*RH+RH/2];
+function sparks(t){const g=seg(t,9.6,.8)*(t<17?1:1);
+ for(let i=0;i<36;i++){let p=spark(i,Math.min(t,17)),x=p.x,y=p.y,r=4+14*(1-p.u),al=(p.u<.1?p.u*10:1-p.u*.6)*g;
+  if(t>17){const q=eo((t-17)/1.3);if(i<20){const [tx,ty]=cellC(Math.floor(i/4),i%4);x=lerp(x,tx,q);y=lerp(y,ty,q);r=lerp(r,16,q);al=lerp(al,1,q)}else al*=1-q;
+   al*=1-seg(t,18.3,.4)}
+  if(al<=0)continue;ctx.globalAlpha=cl(al);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=i%3?'#ffb627':'#ffe14d';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=INK;ctx.stroke()}
+ ctx.globalAlpha=1}
+
+// ---- Claude table
+const HEAD=['Показник','Base','Upside','Downside'],HC=['#fff','#3b82f6','#22c55e','#ef4444'];
+const ROWS=[['Виручка','12,4','14,9','10,1'],['Маржа','38%','41%','33%'],['EBITDA','2,1','3,0','1,2'],['Cash flow','1,4','2,2','0,6']];
+function txt(s,x,y,size,col,w=800){ctx.font=`${w} ${size}px Inter, DejaVu Sans, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=col;ctx.fillText(s,x,y)}
+function table(t){
+ const tp=back((t-18.2)/.7); if(tp<=0)return;
+ for(let r=0;r<5;r++)for(let c=0;c<4;c++){
+  const [cx,cy]=cellC(r,c); let p=1;
+  if(r>0&&c>0)p=back((t-(21.9+((r-1)*3+(c-1))*.14))/.4); 
+  const show=(r===0&&c>0)?cl((t-21.6)/.3):(r>0&&c>0?cl(p):1);
+  const s=Math.max(0,tp)*(r>0&&c>0?Math.max(0,p):1);
+  ctx.save();ctx.translate(cx,cy);ctx.scale(tp,tp);ctx.translate(-cx,-cy);
+  const w=COLW[c]-8,h=RH-8,x=COLX[c]+4,y=TY+r*RH+4;
+  let fill='#fff'; if(r===0)fill=t>21.6?HC[c]:'#fff'; if(c===0&&r>0)fill='#eef2ff';
+  box(x,y,w,h,18,fill,6,0);
+  ctx.save();ctx.translate(cx,cy);const k=(r>0&&c>0)?Math.max(0,p):1;ctx.scale(k,k);
+  if(r===0){txt(HEAD[c],0,2,c===0?36:40,(c>0&&t>21.6)?'#fff':INK)}
+  else if(c===0)txt(ROWS[r-1][0],0,2,r===4?34:40,INK);
+  else if(p>0)txt(ROWS[r-1][c],0,2,48,INK);
+  ctx.restore();ctx.restore()}
+ // outer frame
+ ctx.save();ctx.translate(540,TY+250);ctx.scale(tp,tp);ctx.translate(-540,-TY-250);
+ ctx.lineWidth=10;ctx.strokeStyle=INK;rr(56,TY,968,500,22);ctx.stroke();ctx.restore();
+ // formula links
+ const lp=seg(t,23.6,1.4); if(lp>0){ctx.save();ctx.strokeStyle='#ffd23f';ctx.lineWidth=6;ctx.setLineDash([14,12]);
+  for(let c=1;c<4;c++){for(const r1 of [1,2]){const x=COLX[c]+22,y1=TY+r1*RH+RH/2+24,y2=TY+3*RH+RH/2-24;
+    ctx.globalAlpha=lp;ctx.beginPath();ctx.moveTo(x,y1);ctx.quadraticCurveTo(x-34-(r1===1?22:0),(y1+y2)/2,x,y2-(lp<1?(1-lp)*(y2-y1):0));ctx.stroke()}}
+  ctx.restore()}
+}
+function chart(t){const p=back((t-24.2)/.6);if(p<=0)return;
+ ctx.save();ctx.translate(540,1300);ctx.scale(p,p);ctx.translate(-540,-1300);
+ box(60,1090,960,440,28,'#fff',8,10);
+ ctx.strokeStyle='#d6dcf5';ctx.lineWidth=4;for(let i=0;i<4;i++){const y=1150+i*100;ctx.beginPath();ctx.moveTo(110,y);ctx.lineTo(980,y);ctx.stroke()}
+ const D=[[10,11,12,13.5,14.5,16,17.5,19],[10,11.5,13.5,16,18.5,21,24,27],[10,10.5,10.8,11,11.4,11.6,12,12.2]],C=['#3b82f6','#22c55e','#ef4444'];
+ const gp=cl((t-24.8)/2.2),n=7;
+ D.forEach((d,k)=>{ctx.strokeStyle=C[k];ctx.lineWidth=14;ctx.beginPath();let lx,ly;
+  for(let i=0;i<=n;i++){const q=cl(gp*n-i+1); if(q<=0)break;const x0=130+i*(840/n),y0=1500-(d[i]-8)/20*340;
+   if(i===0){ctx.moveTo(x0,y0);lx=x0;ly=y0}else{const px=130+(i-1)*(840/n),py=1500-(d[i-1]-8)/20*340,x=lerp(px,x0,q),y=lerp(py,y0,q);ctx.lineTo(x,y);lx=x;ly=y}}
+  ctx.stroke();ctx.beginPath();ctx.arc(lx,ly,14,0,7);ctx.fillStyle=C[k];ctx.fill();ctx.lineWidth=6;ctx.strokeStyle=INK;ctx.stroke()});
+ ctx.restore()}
+
+// ---- final icons
+function icons(t){const X=[60,400,740],col=['#35c4f0','#ff7a1a','#ffd23f'];
+ for(let i=0;i<3;i++){const p=back((t-(27.3+i*.2))/.5);if(p<=0)continue;const cx=X[i]+140,cy=840;
+  ctx.save();ctx.translate(cx,cy);ctx.scale(p,p);ctx.translate(-cx,-cy);
+  box(X[i],700,280,280,50,col[i],8,10);
+  ctx.strokeStyle='#fff';ctx.lineWidth=14;
+  if(i===0){for(let k=0;k<3;k++){ctx.beginPath();for(let x=-80;x<=80;x+=8){const y=cy-50+k*50+16*Math.sin(x*.07+t*3+k);x===-80?ctx.moveTo(cx+x,y):ctx.lineTo(cx+x,y)}ctx.stroke()}}
+  else if(i===1){ctx.save();ctx.translate(0,0);flameShape(cx,cy+90,80,200,t,0,'#fff');flameShape(cx,cy+90,42,110,t,2,'#ffe14d');ctx.restore()}
+  else{const bs=[70,120,170];for(let k=0;k<3;k++){const h=bs[k];box(cx-95+k*70,cy+90-h,50,h,10,'#fff',6,0)}}
+  ctx.restore()}}
+
+window.setT=function(t){
+ ctx.clearRect(0,0,W,H);
+ // title 0-3
+ [['t1',.3],['t2',.8],['t3',1.3],['t4',1.8]].forEach(([id,s])=>{const el=$(id),p=back((t-s)/.5),o=1-seg(t,2.7,.5);
+  el.style.opacity=cl((t-s)/.2)*o;el.style.transform=`scale(${.6+.4*Math.max(0,p)})`});
+ // water
+ water(t,seg(t,3.1,.4)*(1-seg(t,9.8,.8)));
+ show($('cap1'),Math.min(seg(t,3.5),1-seg(t,9.6,.5)));
+ // fire
+ fireScene(t,Math.min(1,seg(t,10,.3))*(1-seg(t,16.8,.8)),Math.max(0,seg(t,10,1.1)*(1-seg(t,16.3,1.1))));
+ sparks(t);
+ show($('cap2'),Math.min(seg(t,10.4),1-seg(t,16.5,.5)));
+ // claude
+ table(t);chart(t);
+ const pp=$('prompt');show(pp,seg(t,18.8,.5)*(1-seg(t,27,.6)),20);
+ const q='Побудуй фінмодель на основі цих даних',n=Math.floor(cl((t-19.2)/2.3)*q.length);
+ $('ptxt').textContent=q.slice(0,n);$('cur').style.opacity=(Math.floor(t*2)%2||t<21.6)?1:0;
+ show($('cap3'),Math.min(seg(t,17.6),1-seg(t,27,.6)));
+ // fade claude scene out
+ if(t>27){ctx.save();ctx.globalAlpha=seg(t,27,.6);ctx.fillStyle='#1b2a5c';ctx.fillRect(0,300,W,1300);ctx.restore()}
+ icons(t);show($('fin1'),seg(t,27.9,.5));show($('fin2'),seg(t,28.4,.5));
+ $('note').style.opacity=cl(seg(t,18.8,.5)*(1-seg(t,27,.4)))*.9;
+};
+setT(0);
+</script></body></html>
