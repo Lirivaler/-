@@ -1,7 +1,7 @@
 const {chromium}=require('/opt/node-tools/node_modules/playwright');
 const fs=require('fs');
 (async()=>{
- const out=process.argv[2], fps=30, dur=30;
+ const out=process.argv[2], fps=30, dur=32;
  fs.mkdirSync(out,{recursive:true});
  const b=await chromium.launch();
  const p=await b.newPage({viewport:{width:1080,height:1920}});

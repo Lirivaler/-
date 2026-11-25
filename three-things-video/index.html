@@ -13,6 +13,14 @@ canvas{position:absolute;left:0;top:0}
 #fin1{top:1060px;font-size:86px;white-space:nowrap;text-shadow:0 8px 0 var(--ink)}
 #fin2{top:1260px;font-size:52px;font-weight:600;color:#cfd8ff;padding:0 100px}
 #note{top:1840px;font-size:30px;font-weight:600;color:#9fb0ee}
+#wm{position:absolute;right:40px;bottom:36px;font-size:33px;font-weight:600;color:#fff;opacity:0;text-shadow:0 2px 6px rgba(0,0,0,.5);letter-spacing:.02em}
+#bcard{position:absolute;left:0;top:0;width:1080px;height:1920px;background:#1f3864;opacity:0}
+#bcard>*{position:absolute;left:0;width:1080px;text-align:center;opacity:0}
+#b1{top:470px}#b1 img{width:600px}
+#b2{top:900px;font-size:56px;font-weight:700}
+#b3{top:1000px;left:330px!important;width:420px!important;height:6px;background:#c9a227;opacity:1!important;transform:scaleX(0)}
+#b4{top:1050px;font-size:70px;font-weight:800;color:#c9a227}
+#b5{top:1190px;font-size:42px;font-weight:500;color:#cfd8ff;line-height:1.35;padding:0 120px;text-wrap:balance}
 </style></head><body>
 <canvas id="c" width="1080" height="1920"></canvas>
 <div class="l t" id="t1" style="top:520px">Є три речі,</div>
@@ -26,6 +34,8 @@ canvas{position:absolute;left:0;top:0}
 <div class="l" id="fin1">Вода. Вогонь. Claude.</div>
 <div class="l" id="fin2">Фінанси переходять у новий час.</div>
 <div class="l" id="note">Ілюстративні дані</div>
+<div id="wm">irinalebedeva.com</div>
+<div id="bcard"><div id="b1"><img src="brand/shi-logo-white-440.webp"></div><div id="b2">© Ірина Лебедєва</div><div id="b3"></div><div id="b4">irinalebedeva.com</div><div id="b5">Мультфільм створено з ШІ-агентами. Навчаю робити так само.</div></div>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);
 const INK='#0b1230',W=1080,H=1920;
@@ -40,7 +50,7 @@ function box(x,y,w,h,r,fill,lw=8,sh=10){ if(sh){ctx.fillStyle=INK;rr(x+sh,y+sh,w
 ctx.lineJoin='round';ctx.lineCap='round';
 
 // ---- Water tank
-function water(t,a){ if(a<=0)return; ctx.save(); ctx.globalAlpha=a;
+function water(t,a,ck){ if(a<=0)return; ctx.save(); ctx.globalAlpha=a;
  const rise=(1-seg(t,3.1,.9))*500 + seg(t,9.6,1)*300;
  ctx.translate(0,rise);
  ctx.fillStyle=INK;rr(70,570,960,940,70);ctx.fill();
@@ -48,9 +58,9 @@ function water(t,a){ if(a<=0)return; ctx.save(); ctx.globalAlpha=a;
  const cols=['#7fd6ff','#4cc3f5','#2aa6e8','#1b86d1','#1568b3'];
  for(let k=0;k<5;k++){const base=700+k*150,A=36+k*6;
   ctx.beginPath();ctx.moveTo(0,1600);
-  for(let x=0;x<=W;x+=10){const y=base+A*Math.sin(x*.0085+t*(1.1+k*.15)+k*1.7)+A*.4*Math.sin(x*.018-t*1.6+k);ctx.lineTo(x,y)}
+  for(let x=0;x<=W;x+=10){const y=base+A*Math.sin(x*.0085+ck*(1.1+k*.15)+k*1.7)+A*.4*Math.sin(x*.018-ck*1.6+k);ctx.lineTo(x,y)}
   ctx.lineTo(W,1600);ctx.closePath();ctx.fillStyle=cols[k];ctx.fill();ctx.lineWidth=9;ctx.strokeStyle=INK;ctx.stroke();}
- for(let i=0;i<9;i++){const u=((t*.12+hh(i))%1),x=120+hh(i+9)*840+Math.sin(t*2+i)*14,y=1450-u*800,r=10+hh(i+3)*14;
+ for(let i=0;i<9;i++){const u=((ck*.12+hh(i))%1),x=120+hh(i+9)*840+Math.sin(ck*2+i)*14,y=1450-u*800,r=10+hh(i+3)*14;
   ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle='rgba(255,255,255,.55)';ctx.fill();ctx.lineWidth=5;ctx.strokeStyle=INK;ctx.stroke()}
  ctx.restore();ctx.lineWidth=10;ctx.strokeStyle=INK;rr(60,560,960,940,70);ctx.stroke();ctx.restore()}
 
@@ -62,7 +72,7 @@ function flameShape(cx,by,w,h,t,ph,fill){const s1=Math.sin(t*5+ph)*.12*w,s2=Math
  ctx.fillStyle=fill;ctx.fill();ctx.lineWidth=10;ctx.strokeStyle=INK;ctx.stroke()}
 function logs(cx,by){ctx.save();ctx.translate(cx,by);
  for(const s of [-1,1]){ctx.save();ctx.rotate(s*.2);box(-260,-10,520,70,35,'#9a6330',8,0);ctx.restore()}ctx.restore()}
-function fireScene(t,a,sf){ if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+function fireScene(_t,a,sf,t){ if(a<=0)return;ctx.save();ctx.globalAlpha=a;
  const cx=540,by=1420; ctx.save();ctx.translate(cx,by);ctx.scale(sf,sf);ctx.translate(-cx,-by);
  flameShape(cx-190,by,120,330,t,1,'#ff5a1f');flameShape(cx+190,by,110,290,t,3,'#ff5a1f');
  flameShape(cx,by,270,720,t,0,'#ff5a1f');flameShape(cx,by,200,540,t,2,'#ff9a1f');flameShape(cx,by,125,340,t,4,'#ffe14d');ctx.restore();
@@ -71,8 +81,8 @@ function spark(i,t){const sp=.16+hh(i*5)*.1,u=(t*sp+hh(i*7))%1;
  return{x:540+(hh(i*3+1)-.5)*420+Math.sin(t*2+i)*40*u,y:1400-u*1050,u}}
 const COLX=[60,360,580,800],COLW=[300,220,220,220],TY=500,RH=100;
 const cellC=(r,c)=>[COLX[c]+COLW[c]/2,TY+r*RH+RH/2];
-function sparks(t){const g=seg(t,9.6,.8)*(t<17?1:1);
- for(let i=0;i<36;i++){let p=spark(i,Math.min(t,17)),x=p.x,y=p.y,r=4+14*(1-p.u),al=(p.u<.1?p.u*10:1-p.u*.6)*g;
+function sparks(t,k){const g=seg(t,9.6,.8)*(t<17?1:1);
+ for(let i=0;i<36;i++){let p=spark(i,t<=17?k:13),x=p.x,y=p.y,r=4+14*(1-p.u),al=(p.u<.1?p.u*10:1-p.u*.6)*g;
   if(t>17){const q=eo((t-17)/1.3);if(i<20){const [tx,ty]=cellC(Math.floor(i/4),i%4);x=lerp(x,tx,q);y=lerp(y,ty,q);r=lerp(r,16,q);al=lerp(al,1,q)}else al*=1-q;
    al*=1-seg(t,18.3,.4)}
   if(al<=0)continue;ctx.globalAlpha=cl(al);ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fillStyle=i%3?'#ffb627':'#ffe14d';ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=INK;ctx.stroke()}
@@ -130,17 +140,17 @@ function icons(t){const X=[60,400,740],col=['#35c4f0','#ff7a1a','#ffd23f'];
   else{const bs=[70,120,170];for(let k=0;k<3;k++){const h=bs[k];box(cx-95+k*70,cy+90-h,50,h,10,'#fff',6,0)}}
   ctx.restore()}}
 
-window.setT=function(t){
+window.setT=function(real){const k=real,t=real+(real>=7.6?2:0)+(real>=10.5?2:0);
  ctx.clearRect(0,0,W,H);
  // title 0-3
  [['t1',.3],['t2',.8],['t3',1.3],['t4',1.8]].forEach(([id,s])=>{const el=$(id),p=back((t-s)/.5),o=1-seg(t,2.7,.5);
   el.style.opacity=cl((t-s)/.2)*o;el.style.transform=`scale(${.6+.4*Math.max(0,p)})`});
  // water
- water(t,seg(t,3.1,.4)*(1-seg(t,9.8,.8)));
+ water(t,seg(t,3.1,.4)*(1-seg(t,9.8,.8)),k);
  show($('cap1'),Math.min(seg(t,3.5),1-seg(t,9.6,.5)));
  // fire
- fireScene(t,Math.min(1,seg(t,10,.3))*(1-seg(t,16.8,.8)),Math.max(0,seg(t,10,1.1)*(1-seg(t,16.3,1.1))));
- sparks(t);
+ fireScene(t,Math.min(1,seg(t,10,.3))*(1-seg(t,16.8,.8)),Math.max(0,seg(t,10,1.1)*(1-seg(t,16.3,1.1))),k);
+ sparks(t,k);
  show($('cap2'),Math.min(seg(t,10.4),1-seg(t,16.5,.5)));
  // claude
  table(t);chart(t);
@@ -152,6 +162,10 @@ window.setT=function(t){
  if(t>27){ctx.save();ctx.globalAlpha=seg(t,27,.6);ctx.fillStyle='#1b2a5c';ctx.fillRect(0,300,W,1300);ctx.restore()}
  icons(t);show($('fin1'),seg(t,27.9,.5));show($('fin2'),seg(t,28.4,.5));
  $('note').style.opacity=cl(seg(t,18.8,.5)*(1-seg(t,27,.4)))*.9;
+ $('wm').style.opacity=.5*seg(real,3.2,.5)*(1-seg(real,27.2,.4));
+ $('bcard').style.opacity=seg(real,27.4,.7);
+ [['b1',27.9],['b2',28.4],['b4',29.0],['b5',29.6]].forEach(([id,s])=>show($(id),seg(real,s,.6),24));
+ $('b3').style.transform=`scaleX(${seg(real,28.7,.6)})`;
 };
 setT(0);
 </script></body></html>
