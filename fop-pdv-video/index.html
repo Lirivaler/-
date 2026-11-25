@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<style>
+:root{--ink:#14171c;--mute:#5b6370;--a:#1456d6;--a-tint:#e8f0fd;--b:#d9480f;--b-tint:#fdeee6}
+*{box-sizing:border-box;margin:0}
+html,body{width:1080px;height:1920px;background:#fff;overflow:hidden;font-family:Inter,"DejaVu Sans",sans-serif;color:var(--ink)}
+.l{position:absolute;left:0;width:1080px;text-align:center;opacity:0;text-wrap:balance}
+#tag{top:84px;opacity:1}
+#tag span{display:inline-block;border:4px solid var(--ink);border-radius:999px;padding:12px 36px;font-size:40px;font-weight:800;letter-spacing:.12em}
+#title{top:210px;font-size:104px;font-weight:800;line-height:1.05;padding:0 70px}
+#sub{top:470px;font-size:46px;font-weight:500;color:var(--mute);line-height:1.3;padding:0 90px}
+#num{top:640px;font-size:240px;font-weight:800;letter-spacing:-.03em;line-height:1}
+#cap{top:900px;font-size:44px;font-weight:500;color:var(--mute);line-height:1.3;padding:0 100px}
+svg{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+.card{position:absolute;top:1290px;width:490px;height:380px;border:8px solid;border-radius:28px;opacity:0;padding:34px 12px;text-align:center}
+#c1{left:48px;border-color:var(--a);background:#fff}
+#c2{left:542px;border-color:var(--b);background:#fff}
+.card .when{font-size:40px;font-weight:700;line-height:1.2;height:100px}
+#c1 .when{color:var(--a)} #c2 .when{color:var(--b)}
+.card .res{margin-top:40px;font-size:62px;font-weight:800;line-height:1.05;letter-spacing:-.02em;white-space:nowrap}
+#keep{left:542px;width:490px;top:1710px;font-size:38px;font-weight:700;line-height:1.3;color:var(--b)}
+</style></head><body>
+<div class="l" id="tag"><span>ЗАКОНОПРОЄКТ</span></div>
+<div class="l" id="title">ПДВ для ФОП<br>3-ї групи</div>
+<div class="l" id="sub">Проєкт Мінфіну · пропонований старт&nbsp;— 1&nbsp;січня&nbsp;2028&nbsp;року</div>
+<div class="l" id="num">€85 000</div>
+<div class="l" id="cap">Обсяг операцій, що підпадають під ПДВ, за останні 12 місяців</div>
+<svg viewBox="0 0 1080 1920">
+ <defs><marker id="ha" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#1456d6"/></marker>
+ <marker id="hb" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#d9480f"/></marker></defs>
+ <path id="ar1" d="M470 1090 Q 293 1100 293 1268" fill="none" stroke="#1456d6" stroke-width="10" stroke-linecap="round" marker-end="url(#ha)"/>
+ <path id="ar2" d="M610 1090 Q 787 1100 787 1268" fill="none" stroke="#d9480f" stroke-width="10" stroke-linecap="round" marker-end="url(#hb)"/>
+</svg>
+<div class="card" id="c1"><div class="when" id="w1">До €85 000 включно</div><div class="res" id="r1" style="color:var(--a)">5% ЄП</div></div>
+<div class="card" id="c2"><div class="when" id="w2">Понад €85 000</div><div class="res" id="r2" style="color:var(--b)">3% ЄП + ПДВ</div></div>
+<div class="l" id="keep">ФОП залишається на спрощеній системі</div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=x=>Math.max(0,Math.min(1,x)), ease=x=>1-Math.pow(1-clamp(x),3);
+const seg=(t,a,d=.7)=>ease((t-a)/d);
+function show(el,p,dy=24){el.style.opacity=p;el.style.transform=`translateY(${(1-p)*dy}px)`}
+const len={ar1:$('ar1').getTotalLength(),ar2:$('ar2').getTotalLength()};
+for(const k in len){$(k).style.strokeDasharray=len[k]}
+window.setT=function(t){
+  show($('title'),seg(t,.2)); show($('sub'),seg(t,1.2));
+  show($('num'),seg(t,4.2,.8)); show($('cap'),seg(t,5.4));
+  for(const [k,s] of [['ar1',10.2],['ar2',10.2]]){
+    const p=seg(t,s,1.2); $(k).style.strokeDashoffset=len[k]*(1-p); $(k).style.opacity=p>0?1:0;}
+  show($('c1'),seg(t,11.8),30); show($('c2'),seg(t,15),30);
+  // 20–25 s: highlight second card
+  const h=seg(t,20,.8);
+  const c2=$('c2'); c2.style.background=`rgb(${255-(255-253)*h},${255-(255-238)*h},${255-(255-230)*h})`;
+  c2.style.transform=`translateY(${(1-seg(t,15))*30}px) scale(${1+.02*h})`;
+  $('c1').style.opacity=seg(t,11.8)*(1-.45*h);
+  show($('keep'),seg(t,20.8),18);
+};
+setT(0);
+</script></body></html>
